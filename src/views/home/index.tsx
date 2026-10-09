@@ -4,7 +4,12 @@ import { ConnectivityTile, homeTargets } from "@/components/connectivity";
 import { CountryFlag } from "@/components/country-flag";
 import { NumberTicker } from "@/components/number-ticker";
 import { SiteLogo } from "@/components/site-logo";
-import { ActionButton, IpText, Pending } from "@/components/toolkit";
+import {
+  ActionButton,
+  IpText,
+  Pending,
+  PrivacyToggle,
+} from "@/components/toolkit";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { UnderlineHover } from "@/components/underline-hover";
@@ -17,6 +22,7 @@ import { companyTypeColors } from "@/lib/ip-badge-colors";
 import { ipScoreColor } from "@/lib/ip-score";
 import { BrowserSummary } from "@/views/browser/summary";
 import { lookupIp } from "@/views/ip/api";
+import { PerfectScoreEffects } from "@/views/ip/perfect-score-effects";
 import { testConnectivity, type ProbeResult } from "@/views/link/api";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,6 +36,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { getGeo, getBrowserIp, getDomesticIp } from "./api";
+import { IpSearch } from "./components/ip-search";
 import { PlatformSummary } from "./platform-summary";
 import { SplitResults } from "./split-results";
 
@@ -167,16 +174,22 @@ export function HomePage() {
   const typeByIp = new Map(ips.map((ip, index) => [ip, typeQueries[index]]));
   return (
     <div className="home-page">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h1 className="text-sm font-semibold">{t("网络概览")}</h1>
-        <ActionButton
-          size="sm"
-          variant="outline"
-          busy={refreshing}
-          onClick={refresh}
-        >
-          {refreshing ? t("检测中...") : t("重新检测")}
-        </ActionButton>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <h1 className="text-sm font-semibold">{t("网络概览")}</h1>
+          <PrivacyToggle iconOnly />
+        </div>
+        <div className="flex items-center gap-2">
+          <IpSearch />
+          <ActionButton
+            size="sm"
+            variant="outline"
+            busy={refreshing}
+            onClick={refresh}
+          >
+            {refreshing ? t("检测中...") : t("重新检测")}
+          </ActionButton>
+        </div>
       </div>
       <div className="home-overview home-ip-overview">
         {cards.map(({ query, data, version, label }, index) => {
@@ -245,6 +258,7 @@ export function HomePage() {
               key={index}
               className={`home-primary-card relative${score === 100 ? " ip-dossier-perfect" : ""}`}
             >
+              {score === 100 && <PerfectScoreEffects />}
               {data && (
                 <Link
                   to={`/network/ip/${encodeURIComponent(data.ip)}`}
@@ -389,9 +403,9 @@ export function HomePage() {
                 icon: () => <SiteLogo website="https://chatgpt.com" />,
               },
               {
-                path: "/network/exits",
-                label: t("分流出口"),
-                description: t("核对不同网站的实际出口"),
+                path: "/network/connectivity",
+                label: t("网站连通与出口"),
+                description: t("核对网站连通性、响应延迟和实际出口"),
                 icon: Network,
               },
               {
